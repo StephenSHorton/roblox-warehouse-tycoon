@@ -1,8 +1,13 @@
 import { Networking } from "@flamework/networking";
 
-interface ClientToServerEvents {}
+interface ClientToServerEvents {
+	dropBox: () => void;
+}
 
-interface ServerToClientEvents {}
+interface ServerToClientEvents {
+	playAnimation: (animationTag: CustomAnimationTag) => void;
+	stopAnimation: () => void;
+}
 
 interface ClientToServerFunctions {}
 
