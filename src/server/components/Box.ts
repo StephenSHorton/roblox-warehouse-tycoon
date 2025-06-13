@@ -16,6 +16,7 @@ interface Attributes {}
 export class Box extends BaseComponent<Attributes, BoxInstance> implements OnStart {
 	private maid = new Maid();
 	private currentWeld: WeldConstraint | undefined;
+	private playerCarrier: Player | undefined;
 
 	onStart() {
 		// Setup the box
@@ -58,6 +59,9 @@ export class Box extends BaseComponent<Attributes, BoxInstance> implements OnSta
 	 * Drops the box by removing the weld.
 	 */
 	public drop() {
+		// Stop the animation
+		if (this.playerCarrier) Events.stopAnimation.fire(this.playerCarrier);
+
 		// Remove the weld
 		this.currentWeld?.Destroy();
 		this.currentWeld = undefined;
@@ -65,6 +69,9 @@ export class Box extends BaseComponent<Attributes, BoxInstance> implements OnSta
 		// Re-enable the pick up prompt
 		this.instance.PickUpPrompt.Enabled = true;
 		this.instance.DropPrompt.Enabled = false;
+
+		// Reset the player carrier
+		this.playerCarrier = undefined;
 	}
 
 	/**
@@ -94,15 +101,18 @@ export class Box extends BaseComponent<Attributes, BoxInstance> implements OnSta
 				);
 
 				const pickedUp = this.pickUp(upperTorso, offset);
-				if (pickedUp) Events.playAnimation.fire(player, "Carry");
+				if (pickedUp) {
+					Events.playAnimation.fire(player, "Carry");
+					this.playerCarrier = player;
+				}
 			}),
 		);
 
 		// Setup the drop prompt to trigger the drop function
 		this.maid.GiveTask(
 			this.instance.DropPrompt.Triggered.Connect((player) => {
+				if (this.playerCarrier !== player) return;
 				this.drop();
-				Events.stopAnimation.fire(player);
 			}),
 		);
 	}
