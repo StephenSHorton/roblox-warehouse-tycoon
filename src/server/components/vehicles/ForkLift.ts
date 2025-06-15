@@ -1,17 +1,15 @@
-import { Component } from "@flamework/components";
-import { OnStart } from "@flamework/core";
-import { Workspace } from "@rbxts/services";
+import { Component, Components } from "@flamework/components";
+import { Dependency, OnStart } from "@flamework/core";
 import { Events } from "server/network";
 
+import { PalletDetector, PalletDetectorInstance } from "../PalletDetector";
 import { Vehicle, VehicleAttributes, VehicleInstance } from "./base/Vehicle";
 
 interface ForkLiftInstance extends VehicleInstance {
 	Body: UnionOperation & {
 		RightPrismaticConstraint: PrismaticConstraint;
 	};
-	PalletDetector: Part & {
-		PalletWeldLocation: Attachment;
-	};
+	PalletDetector: PalletDetectorInstance;
 }
 
 interface Attributes extends VehicleAttributes {}
@@ -23,10 +21,19 @@ export class ForkLift extends Vehicle<Attributes, ForkLiftInstance> implements O
 	protected STEER_ANGLE = 25;
 	protected MAX_SPEED = 10;
 
-	private heldPalletWeld: WeldConstraint | undefined;
+	private palletDetector?: PalletDetector;
 
 	onStart() {
 		super.onStart();
+
+		const components = Dependency<Components>();
+		const detector = components.getComponent<PalletDetector>(this.instance.PalletDetector);
+
+		if (!detector) {
+			error("Failed to get PalletDetector component for ForkLift");
+		}
+
+		this.palletDetector = detector;
 
 		this.instance.PalletDetector.Transparency = 1;
 
@@ -46,13 +53,17 @@ export class ForkLift extends Vehicle<Attributes, ForkLiftInstance> implements O
 			if (pressed) {
 				switch (input) {
 					case Enum.KeyCode.Q:
-						direction = "up";
-						break;
-					case Enum.KeyCode.E:
 						direction = "down";
 						break;
+					case Enum.KeyCode.E:
+						direction = "up";
+						break;
 					case Enum.KeyCode.F:
-						this.toggleLockNearbyPallet();
+						this.palletDetector?.tryLockPallet();
+						break;
+					case Enum.KeyCode.G:
+						print("unlocking pallet");
+						this.palletDetector?.tryUnlockPallet();
 						break;
 				}
 			}
@@ -71,40 +82,5 @@ export class ForkLift extends Vehicle<Attributes, ForkLiftInstance> implements O
 		} else {
 			rightConstraint.TargetPosition = rightConstraint.CurrentPosition;
 		}
-	}
-
-	private toggleLockNearbyPallet() {
-		if (this.heldPalletWeld) {
-			this.heldPalletWeld.Destroy();
-			this.heldPalletWeld = undefined;
-			return;
-		}
-
-		const palletDetector = this.instance.PalletDetector;
-
-		const overlapParams = new OverlapParams();
-		overlapParams.FilterType = Enum.RaycastFilterType.Exclude;
-		overlapParams.FilterDescendantsInstances = [this.instance];
-
-		const parts = Workspace.GetPartBoundsInBox(palletDetector.CFrame, palletDetector.Size, overlapParams);
-
-		if (parts.size() === 0) return warn("no parts found on pallet detector");
-
-		let pallet: Model | undefined;
-		for (const part of parts) {
-			if (part.Parent?.Name !== "WoodenPallet") continue;
-			pallet = part.Parent as Model;
-		}
-
-		if (!pallet) return warn("no pallet found");
-
-		pallet.PivotTo(palletDetector.PalletWeldLocation.WorldCFrame);
-
-		const weld = new Instance("WeldConstraint");
-		weld.Part0 = pallet.PrimaryPart;
-		weld.Part1 = palletDetector;
-		weld.Parent = pallet.PrimaryPart;
-
-		this.heldPalletWeld = weld;
 	}
 }

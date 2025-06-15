@@ -26,6 +26,9 @@ export class VehicleControl implements OnStart {
 				case Enum.KeyCode.F:
 					Events.driverInput.fire(input.KeyCode, true);
 					break;
+				case Enum.KeyCode.G:
+					Events.driverInput.fire(input.KeyCode, true);
+					break;
 			}
 		});
 
@@ -42,6 +45,9 @@ export class VehicleControl implements OnStart {
 					Events.driverInput.fire(input.KeyCode, false);
 					break;
 				case Enum.KeyCode.F:
+					Events.driverInput.fire(input.KeyCode, false);
+					break;
+				case Enum.KeyCode.G:
 					Events.driverInput.fire(input.KeyCode, false);
 					break;
 			}

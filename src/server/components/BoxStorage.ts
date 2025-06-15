@@ -4,7 +4,7 @@ import { Workspace } from "@rbxts/services";
 
 import { Box, BoxInstance } from "./Box";
 
-interface ShelfInstance extends Model {
+interface BoxStorageInstance extends Model {
 	RootPart: BasePart & {
 		TakePrompt: ProximityPrompt;
 	};
@@ -13,11 +13,12 @@ interface ShelfInstance extends Model {
 interface Attributes {}
 
 @Component({
-	tag: "Shelf",
+	tag: "BoxStorage",
 })
-export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements OnStart {
+export class BoxStorage extends BaseComponent<Attributes, BoxStorageInstance> implements OnStart {
 	private boxDebounce: Array<BoxInstance> = [];
 	private slots = new Map<Attachment, Box | false>();
+	private disabled = false;
 
 	onStart() {
 		this.instance.RootPart.TakePrompt.Enabled = false;
@@ -73,12 +74,26 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements O
 	}
 
 	/**
-	 * Occupies a slot in the shelf, enabling the prompt to take a box from the shelf
+	 * Toggles the enabled state of the BoxStorage
+	 * @param enabled Whether to enable or disable the BoxStorage
+	 */
+	public toggleEnabled(enabled: boolean) {
+		if (enabled) {
+			this.disabled = false;
+			this.setTakePromptEnabled(enabled);
+		} else {
+			this.disabled = true;
+			this.instance.RootPart.TakePrompt.Enabled = false;
+		}
+	}
+
+	/**
+	 * Occupies a slot in the BoxStorage, enabling the prompt to take a box from the BoxStorage
 	 * @param slot The slot to occupy
 	 */
 	private occupySlot(slot: Attachment, box: Box) {
 		this.slots.set(slot, box);
-		this.instance.RootPart.TakePrompt.Enabled = true;
+		this.setTakePromptEnabled(true);
 	}
 
 	private unoccupySlot(slot: Attachment) {
@@ -88,11 +103,11 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements O
 		if (this.getOccupiedSlot()) return;
 
 		// Otherwise, disable the prompt
-		this.instance.RootPart.TakePrompt.Enabled = false;
+		this.setTakePromptEnabled(false);
 	}
 
 	/**
-	 * Finds a free slot in the shelf from the bottom up
+	 * Finds a free slot in the BoxStorage from the bottom up
 	 * @returns The first free slot, or undefined if no slots are free
 	 */
 	private getFreeSlot(): Attachment | undefined {
@@ -104,7 +119,7 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements O
 
 		if (freeSlots.size() === 0) return undefined;
 
-		// Sort the free slots by their position in the shelf
+		// Sort the free slots by their position in the BoxStorage
 		freeSlots.sort((a, b) => a.Position.Y < b.Position.Y);
 
 		// Return the first free slot
@@ -112,7 +127,7 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements O
 	}
 
 	/**
-	 * Finds an occupied slot in the shelf from the top down
+	 * Finds an occupied slot in the BoxStorage from the top down
 	 * @returns The first occupied slot, or undefined if no slots are occupied
 	 */
 	private getOccupiedSlot(): [Attachment, Box] | undefined {
@@ -124,9 +139,14 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements O
 
 		if (occupiedSlots.size() === 0) return undefined;
 
-		// Sort the occupied slots by their position in the shelf
+		// Sort the occupied slots by their position in the BoxStorage
 		occupiedSlots.sort((a, b) => a[0].Position.Y > b[0].Position.Y);
 
 		return occupiedSlots[0];
+	}
+
+	private setTakePromptEnabled(enabled: boolean) {
+		if (this.disabled) return;
+		this.instance.RootPart.TakePrompt.Enabled = enabled;
 	}
 }

@@ -1,6 +1,6 @@
 import { BaseComponent, Component } from "@flamework/components";
 import { OnStart } from "@flamework/core";
-import { Players } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { Events } from "server/network";
 
 export interface VehicleInstance extends Model {
@@ -59,11 +59,15 @@ export abstract class Vehicle<
 
 				Events.toggleDriving.fire(this.occupant, false);
 				this.occupant = undefined;
+
+				this.instance.Parent = Workspace;
 				return;
 			}
 
 			const player = Players.GetPlayerFromCharacter(seat.Occupant.Parent);
 			if (!player) return;
+
+			this.instance.Parent = player.Character;
 
 			Events.toggleDriving.fire(player, true);
 			this.occupant = player;

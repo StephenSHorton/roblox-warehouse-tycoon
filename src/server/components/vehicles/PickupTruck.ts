@@ -3,7 +3,7 @@ import { OnStart } from "@flamework/core";
 
 import { Vehicle, VehicleAttributes, VehicleInstance } from "./base/Vehicle";
 
-interface TruckInstance extends VehicleInstance {
+interface PickupTruckInstance extends VehicleInstance {
 	Cabin: Model & {
 		LeftHeadlight: Part & {
 			SpotLight: SpotLight;
@@ -17,9 +17,9 @@ interface TruckInstance extends VehicleInstance {
 interface Attributes extends VehicleAttributes {}
 
 @Component({
-	tag: "Truck",
+	tag: "PickupTruck",
 })
-export class Truck extends Vehicle<Attributes, TruckInstance> implements OnStart {
+export class PickupTruck extends Vehicle<Attributes, PickupTruckInstance> implements OnStart {
 	protected STEER_ANGLE = 30;
 	protected MAX_SPEED = 20;
 
