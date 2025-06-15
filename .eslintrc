@@ -5,22 +5,15 @@
 		"useJSXTextNode": true,
 		"ecmaVersion": 2018,
 		"sourceType": "module",
-		"project": "./tsconfig.json"
+		"project": "./tsconfig.json",
 	},
-	"ignorePatterns": [
-		"/out"
-	],
-	"plugins": [
-		"@typescript-eslint",
-		"roblox-ts",
-		"prettier",
-		"simple-import-sort"
-	],
+	"ignorePatterns": ["/out"],
+	"plugins": ["@typescript-eslint", "roblox-ts", "prettier", "simple-import-sort"],
 	"extends": [
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:roblox-ts/recommended",
-		"plugin:prettier/recommended"
+		"plugin:prettier/recommended",
 	],
 	"rules": {
 		"prettier/prettier": "warn",
@@ -34,8 +27,9 @@
 				"varsIgnorePattern": "^_",
 				"argsIgnorePattern": "^_",
 				"caughtErrorsIgnorePattern": "^_",
-				"destructuredArrayIgnorePattern": "^_"
-			}
-		]
-	}
+				"destructuredArrayIgnorePattern": "^_",
+			},
+		],
+		"roblox-ts/lua-truthiness": "off",
+	},
 }

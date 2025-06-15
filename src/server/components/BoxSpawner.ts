@@ -8,7 +8,7 @@ interface BoxSpawnerInstance extends BasePart {}
 
 interface Attributes {}
 
-const SPAWN_INTERVAL = 3;
+const SPAWN_INTERVAL = 2;
 
 @Component({
 	tag: "BoxSpawner",

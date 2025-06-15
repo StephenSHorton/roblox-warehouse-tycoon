@@ -52,7 +52,7 @@ export class Box extends BaseComponent<Attributes, BoxInstance> implements OnSta
 
 		if (options?.random) {
 			boxInstance.BrickColor = randomBoxColor();
-			boxInstance.Size = randomBoxSize();
+			// boxInstance.Size = randomBoxSize();
 		}
 
 		return box;
@@ -104,6 +104,14 @@ export class Box extends BaseComponent<Attributes, BoxInstance> implements OnSta
 		const character = player.Character;
 		const upperTorso = character?.FindFirstChild("UpperTorso");
 		if (!upperTorso || !upperTorso.IsA("BasePart")) return warn("No upper torso found");
+
+		// Check if the player is already carrying a box
+		const isCarryingBox =
+			upperTorso
+				.GetChildren()
+				.filter((child): child is WeldConstraint => child.IsA("WeldConstraint") && child.Name === "BoxWeld")
+				.size() > 0;
+		if (isCarryingBox) return;
 
 		const boxSizeOffset = this.instance.Size.Z / 2;
 		const torsoSizeOffset = upperTorso.Size.Z / 2;
@@ -169,6 +177,6 @@ function randomBoxColor(): BrickColor {
 	return Box.colors[math.random(1, Box.colors.size()) - 1];
 }
 
-function randomBoxSize(): Vector3 {
-	return new Vector3(math.random(2, 3), math.random(2, 3), math.random(2, 3));
-}
+// function randomBoxSize(): Vector3 {
+// 	return new Vector3(math.random(2, 3), math.random(2, 3), math.random(2, 3));
+// }

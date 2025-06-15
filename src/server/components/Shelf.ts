@@ -92,27 +92,41 @@ export class Shelf extends BaseComponent<Attributes, ShelfInstance> implements O
 	}
 
 	/**
-	 * Finds a free slot in the shelf
+	 * Finds a free slot in the shelf from the bottom up
 	 * @returns The first free slot, or undefined if no slots are free
 	 */
 	private getFreeSlot(): Attachment | undefined {
+		const freeSlots = [];
 		for (const [attachment, box] of this.slots) {
 			if (box) continue;
-			return attachment;
+			freeSlots.push(attachment);
 		}
 
-		return undefined;
+		if (freeSlots.size() === 0) return undefined;
+
+		// Sort the free slots by their position in the shelf
+		freeSlots.sort((a, b) => a.Position.Y < b.Position.Y);
+
+		// Return the first free slot
+		return freeSlots[0];
 	}
 
 	/**
-	 * Finds an occupied slot in the shelf
+	 * Finds an occupied slot in the shelf from the top down
 	 * @returns The first occupied slot, or undefined if no slots are occupied
 	 */
 	private getOccupiedSlot(): [Attachment, Box] | undefined {
+		const occupiedSlots: Array<[Attachment, Box]> = [];
 		for (const [attachment, box] of this.slots) {
 			if (!box) continue;
-			return [attachment, box];
+			occupiedSlots.push([attachment, box]);
 		}
-		return undefined;
+
+		if (occupiedSlots.size() === 0) return undefined;
+
+		// Sort the occupied slots by their position in the shelf
+		occupiedSlots.sort((a, b) => a[0].Position.Y > b[0].Position.Y);
+
+		return occupiedSlots[0];
 	}
 }
