@@ -73,6 +73,14 @@ export class BoxStorage extends BaseComponent<Attributes, BoxStorageInstance> im
 		});
 	}
 
+	public getBoxCount(): number {
+		let count = 0;
+		this.slots.forEach((box) => {
+			if (box) count++;
+		});
+		return count;
+	}
+
 	/**
 	 * Toggles the enabled state of the BoxStorage
 	 * @param enabled Whether to enable or disable the BoxStorage
